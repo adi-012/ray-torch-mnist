@@ -4,14 +4,14 @@ metadata:
   name: rayjob-pytorch-mnist
 spec:
   shutdownAfterJobFinishes: false
-  entrypoint: python /app/mnist_train.py
+  entrypoint: python mnist_train.py
   runtimeEnvYAML: |
     pip:
       - torch
       - torchvision
       - filelock
       - tqdm
-    working_dir: "/app"
+    working_dir: "https://github.com/adi-012/ray-torch-mnist/archive/master.zip"
     env_vars:
       NUM_WORKERS: "2"
       CPUS_PER_WORKER: "1"
@@ -38,13 +38,6 @@ spec:
                 requests:
                   cpu: "0.5"
                   memory: "3Gi"
-              volumeMounts:
-                - name: code-volume
-                  mountPath: /app
-          volumes:
-            - name: code-volume
-              configMap:
-                name: mnist-code
     workerGroupSpecs:
       - replicas: 2
         minReplicas: 2
@@ -63,10 +56,3 @@ spec:
                   requests:
                     cpu: "1"
                     memory: "3Gi"
-                volumeMounts:
-                  - name: code-volume
-                    mountPath: /app
-            volumes:
-              - name: code-volume
-                configMap:
-                  name: mnist-code
