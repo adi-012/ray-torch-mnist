@@ -1,0 +1,72 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: rayjob-pytorch-mnist
+spec:
+  shutdownAfterJobFinishes: false
+  entrypoint: python /app/mnist_train.py
+  runtimeEnvYAML: |
+    pip:
+      - torch
+      - torchvision
+      - filelock
+      - tqdm
+    working_dir: "/app"
+    env_vars:
+      NUM_WORKERS: "2"
+      CPUS_PER_WORKER: "1"
+  rayClusterSpec:
+    rayVersion: '2.41.0'
+    headGroupSpec:
+      rayStartParams: {}
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: rayproject/ray:2.41.0
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "3Gi"
+                requests:
+                  cpu: "1"
+                  memory: "3Gi"
+              volumeMounts:
+                - name: code-volume
+                  mountPath: /app
+          volumes:
+            - name: code-volume
+              configMap:
+                name: mnist-code
+    workerGroupSpecs:
+      - replicas: 2
+        minReplicas: 2
+        maxReplicas: 2
+        groupName: small-group
+        rayStartParams: {}
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: rayproject/ray:2.41.0
+                resources:
+                  limits:
+                    cpu: "1.5"
+                    memory: "4Gi"
+                  requests:
+                    cpu: "1.5"
+                    memory: "4Gi"
+                volumeMounts:
+                  - name: code-volume
+                    mountPath: /app
+            volumes:
+              - name: code-volume
+                configMap:
+                  name: mnist-code
