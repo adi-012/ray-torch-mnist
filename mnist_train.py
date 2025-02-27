@@ -164,4 +164,4 @@ def train_mnist(num_workers=2, cpus_per_worker=1, use_gpu=False):
 if __name__ == "__main__":
     num_workers = int(os.getenv("NUM_WORKERS", "2"))
     cpus_per_worker = int(os.getenv("CPUS_PER_WORKER", "1"))
-    train_mnist(num_workers=num_workers, cpus_per_worker=cpus_per_worker)
+    train_mnist(num_workers=2, cpus_per_worker=1)
